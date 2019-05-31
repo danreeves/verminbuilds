@@ -143,7 +143,8 @@ function App() {
                       }
                     >
                       {t(talent)}
-                      {format(t(talent_data.description), [
+                      {// TODO: Handle percent and baked_percent value_type
+                      format(t(talent_data.description), [
                         talent_data.description_values[0] &&
                           talent_data.description_values[0].value * -100
                       ])}
