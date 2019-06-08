@@ -1,6 +1,6 @@
 import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
-import format from "format";
+import { vsprintf as format } from "format";
 import styled from "styled-components";
 import generatedData from "./generated/data.json";
 
@@ -55,6 +55,31 @@ function getTalentTreeFromCareer(character, career) {
 
 function getTalent(character, name) {
   return talents[character].find(talent => talent.name === name);
+}
+
+function localiseTalent(t, talent_data) {
+  let values = null;
+  if (Array.isArray(talent_data.description_values)) {
+    values = talent_data.description_values.map(val => {
+      const { value, value_type } = val;
+      switch (value_type) {
+        case "percent":
+          return Math.abs(value * -100);
+        case "baked_percent":
+          return value * 100 - 100;
+        default:
+          return value;
+      }
+    });
+  }
+  let description = t(talent_data.description);
+  if (talent_data.description === "bardin_ranger_reduced_spread_desc") {
+    // wat
+    description = description.replace("%1.f", "%.1f");
+  }
+  // Fix rendering inconsistency: we don't want floating points
+  description = description.replace("%.1f", "%d");
+  return format(description, values);
 }
 
 function reducer(state, action) {
@@ -143,11 +168,7 @@ function App() {
                       }
                     >
                       {t(talent)}
-                      {// TODO: Handle percent and baked_percent and no value_type
-                      format(t(talent_data.description), [
-                        talent_data.description_values[0] &&
-                          talent_data.description_values[0].value * -100
-                      ])}
+                      {localiseTalent(t, talent_data)}
                     </Button>
                   );
                 })}
