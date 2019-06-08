@@ -111,7 +111,6 @@ function App() {
   const { t } = useTranslation();
   const [build, dispatch] = useReducer(reducer, defaultState);
   const { character, career, talents } = build;
-  console.log(getCareersFromCharacter(character));
 
   return (
     <Page>
