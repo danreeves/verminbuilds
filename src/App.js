@@ -2,7 +2,7 @@ import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { vsprintf as format } from "format";
 import styled from "styled-components";
-import { Record, Map } from "immutable";
+import { Record } from "immutable";
 import generatedData from "./generated/data.json";
 
 // TODO: rename these keys in the generated data
@@ -36,6 +36,9 @@ const Button = styled.button`
   ${({ active }) => active && `color: red`}
   flex-grow: 1;
   flex-basis: 0;
+  max-width: calc(33% - 0.5rem);
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
 `;
 
 const Ability = styled.div`
@@ -104,10 +107,19 @@ function reducer(state, action) {
   }
 }
 
+// TODO: make this Record generated from
+// https://github.com/Aussiemon/Vermintide-2-Source-Code/blob/master/scripts/managers/talents/talent_settings.lua#L9-L10
+const Talents = Record(
+  Array.from({ length: 5 }).reduce((o, _, i) => {
+    o[i] = null;
+    return o;
+  }, {})
+);
+
 const Build = Record({
   character: characters[0],
   career: getDefaultCareerFromCharacter(characters[0])[0],
-  talents: Map()
+  talents: Talents()
 });
 
 const defaultState = Build();
