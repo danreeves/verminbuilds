@@ -207,6 +207,10 @@ function App() {
           }
         )}
       </Section>
+      {careers[career].loadout_equipment_slots.map((type, i) => {
+        return <p key={type + i}>{type}</p>;
+      })}
+      <Section />
     </Page>
   );
 }
