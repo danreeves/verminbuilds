@@ -38,6 +38,11 @@ const Button = styled.button`
   flex-basis: 0;
 `;
 
+const Ability = styled.div`
+  flex-grow: 1;
+  flex-basis: 0;
+`;
+
 function getCareersFromCharacter(character) {
   return Object.entries(careers)
     .filter(([key]) => key !== "empire_soldier_tutorial")
@@ -143,6 +148,23 @@ function App() {
       </Section>
 
       <Section>
+        <p>{t(careers[career].description)}</p>
+      </Section>
+
+      <Section>
+        <Row>
+          <Ability>
+            <p>{t(careers[career].passive_ability.display_name)}</p>
+            <p>{t(careers[career].passive_ability.description)}</p>
+          </Ability>
+          <Ability>
+            <p>{t(careers[career].activated_ability.display_name)}</p>
+            <p>{t(careers[career].activated_ability.description)}</p>
+          </Ability>
+        </Row>
+      </Section>
+
+      <Section>
         {getTalentTreeFromCareer(character, careers[career]).map(
           (row, row_index) => {
             return (
@@ -163,8 +185,8 @@ function App() {
                         })
                       }
                     >
-                      {t(talent)}
-                      {localiseTalent(t, talent_data)}
+                      <div>{t(talent)}</div>
+                      <div>{localiseTalent(t, talent_data)}</div>
                     </Button>
                   );
                 })}
