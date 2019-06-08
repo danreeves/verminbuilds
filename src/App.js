@@ -2,6 +2,7 @@ import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { vsprintf as format } from "format";
 import styled from "styled-components";
+import { Record, Map } from "immutable";
 import generatedData from "./generated/data.json";
 
 // TODO: rename these keys in the generated data
@@ -41,7 +42,7 @@ function getCareersFromCharacter(character) {
   return Object.entries(careers)
     .filter(([key]) => key !== "empire_soldier_tutorial")
     .filter(([_, char]) => char.profile_name === character)
-    .sort((a, b) => a[1].sort_order > b[1].sort_order);
+    .sort((a, b) => (a[1].sort_order > b[1].sort_order ? 1 : -1));
 }
 
 function getDefaultCareerFromCharacter(character) {
@@ -86,36 +87,31 @@ function reducer(state, action) {
   const { type, payload } = action;
   switch (type) {
     case "character":
-      return {
-        ...state,
-        character: payload,
-        career: getDefaultCareerFromCharacter(payload)[0]
-      };
+      return state
+        .set("character", payload)
+        .set("career", getDefaultCareerFromCharacter(payload)[0]);
     case "career":
-      return { ...state, career: payload };
+      return state.set("career", payload);
     case "talent":
-      return {
-        ...state,
-        talents: {
-          ...state.talents,
-          ...payload
-        }
-      };
+      return state.setIn(["talents", payload.row_index], payload.talent_index);
     default:
       throw new Error(`Action "${type}" not matched`);
   }
 }
 
-const defaultState = {
+const Build = Record({
   character: characters[0],
   career: getDefaultCareerFromCharacter(characters[0])[0],
-  talents: {}
-};
+  talents: Map()
+});
+
+const defaultState = Build();
 
 function App() {
   const { t } = useTranslation();
-  const [form, dispatch] = useReducer(reducer, defaultState);
-  const { character, career, talents } = form;
+  const [build, dispatch] = useReducer(reducer, defaultState);
+  const { character, career, talents } = build;
+  console.log(getCareersFromCharacter(character));
 
   return (
     <Page>
@@ -157,12 +153,13 @@ function App() {
                   return (
                     <Button
                       key={`${row_index}${talent_index}`}
-                      active={talents[row_index] === talent_index}
+                      active={talents.get(row_index) === talent_index}
                       onClick={() =>
                         dispatch({
                           type: "talent",
                           payload: {
-                            [row_index]: talent_index
+                            row_index,
+                            talent_index
                           }
                         })
                       }
