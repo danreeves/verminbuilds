@@ -5,17 +5,9 @@ import styled from "styled-components";
 import { Record } from "immutable";
 import generatedData from "./generated/data.json";
 
-// TODO: rename these keys in the generated data
-const { characters: careers, trees: talentTrees, talents } = generatedData;
+const { characters, careers, trees: talentTrees, talents } = generatedData;
 
-// TODO: This ordered list should come from the generated data
-const characters = [
-  "empire_soldier",
-  "dwarf_ranger",
-  "wood_elf",
-  "witch_hunter",
-  "bright_wizard"
-];
+const characterKeys = Object.keys(characters);
 
 const Page = styled.div`
   max-width: 800px;
@@ -117,8 +109,8 @@ const Talents = Record(
 );
 
 const Build = Record({
-  character: characters[0],
-  career: getDefaultCareerFromCharacter(characters[0])[0],
+  character: characterKeys[0],
+  career: getDefaultCareerFromCharacter(characterKeys[0])[0],
   talents: Talents()
 });
 
@@ -133,15 +125,18 @@ function App() {
     <Page>
       <Section>
         <Row>
-          {characters.map(key => (
-            <Button
-              key={key}
-              onClick={() => dispatch({ type: "character", payload: key })}
-              active={key === character}
-            >
-              {t(key)}
-            </Button>
-          ))}
+          {characterKeys.map(key => {
+            const char = characters[key];
+            return (
+              <Button
+                key={key}
+                onClick={() => dispatch({ type: "character", payload: key })}
+                active={key === character}
+              >
+                {t(char.ingame_display_name)}
+              </Button>
+            );
+          })}
         </Row>
       </Section>
 
@@ -157,10 +152,6 @@ function App() {
             </Button>
           ))}
         </Row>
-      </Section>
-
-      <Section>
-        <p>{t(careers[career].description)}</p>
       </Section>
 
       <Section>
