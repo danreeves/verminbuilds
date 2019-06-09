@@ -10,7 +10,7 @@ const {
   careers,
   trees: talentTrees,
   talents,
-  weapons
+  items
 } = generatedData;
 
 const characterKeys = Object.keys(characters);
@@ -209,14 +209,14 @@ function App() {
           <div>
             <p key={type + i}>{type}</p>
             <select>
-              {Object.values(weapons)
-                .filter(wep => {
+              {Object.values(items)
+                .filter(item => {
                   return (
-                    wep.slot_type === type && wep.can_wield.includes(career)
+                    item.slot_type === type && item.can_wield.includes(career)
                   );
                 })
-                .map(wep => (
-                  <option>{t(wep.item_type)}</option>
+                .map(item => (
+                  <option>{t(item.item_type)}</option>
                 ))}
             </select>
           </div>
