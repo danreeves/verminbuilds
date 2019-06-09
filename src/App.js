@@ -2,7 +2,7 @@ import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { vsprintf as format } from "format";
 import styled from "styled-components";
-import { Record } from "immutable";
+import { Record, Map } from "immutable";
 import generatedData from "./generated/data.json";
 
 const {
@@ -12,6 +12,8 @@ const {
   talents,
   items
 } = generatedData;
+
+console.log(items);
 
 const characterKeys = Object.keys(characters);
 
@@ -100,6 +102,8 @@ function reducer(state, action) {
       return state.set("career", payload);
     case "talent":
       return state.setIn(["talents", payload.row_index], payload.talent_index);
+    case "equip":
+      return state.setIn(["equipment", payload.type], payload.item);
     default:
       throw new Error(`Action "${type}" not matched`);
   }
@@ -117,7 +121,8 @@ const Talents = Record(
 const Build = Record({
   character: characterKeys[0],
   career: getDefaultCareerFromCharacter(characterKeys[0])[0],
-  talents: Talents()
+  talents: Talents(),
+  equipment: Map()
 });
 
 const defaultState = Build();
@@ -126,6 +131,8 @@ function App() {
   const { t } = useTranslation();
   const [build, dispatch] = useReducer(reducer, defaultState);
   const { character, career, talents } = build;
+
+  console.log(build);
 
   return (
     <Page>
@@ -220,7 +227,17 @@ function App() {
       {careers[career].loadout_equipment_slots.map((type, i) => {
         return (
           <div key={type}>
-            <select>
+            <select
+              onChange={e => {
+                dispatch({
+                  type: "equip",
+                  payload: {
+                    type,
+                    item: e.target.value
+                  }
+                });
+              }}
+            >
               {Object.values(items)
                 .filter(item => {
                   // TODO: Too many trinkets, charms, and necklaces :(
@@ -229,7 +246,9 @@ function App() {
                   );
                 })
                 .map(item => (
-                  <option key={item.item_type}>{t(item.item_type)}</option>
+                  <option key={item.item_type} value={item.item_type}>
+                    {t(item.item_type)}
+                  </option>
                 ))}
             </select>
           </div>
