@@ -5,7 +5,13 @@ import styled from "styled-components";
 import { Record } from "immutable";
 import generatedData from "./generated/data.json";
 
-const { characters, careers, trees: talentTrees, talents } = generatedData;
+const {
+  characters,
+  careers,
+  trees: talentTrees,
+  talents,
+  weapons
+} = generatedData;
 
 const characterKeys = Object.keys(characters);
 
@@ -199,7 +205,22 @@ function App() {
         )}
       </Section>
       {careers[career].loadout_equipment_slots.map((type, i) => {
-        return <p key={type + i}>{type}</p>;
+        return (
+          <div>
+            <p key={type + i}>{type}</p>
+            <select>
+              {Object.values(weapons)
+                .filter(wep => {
+                  return (
+                    wep.slot_type === type && wep.can_wield.includes(career)
+                  );
+                })
+                .map(wep => (
+                  <option>{t(wep.item_type)}</option>
+                ))}
+            </select>
+          </div>
+        );
       })}
       <Section />
     </Page>
