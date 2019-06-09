@@ -163,13 +163,26 @@ function App() {
       <Section>
         <Row>
           <Ability>
+            <h2>Passive Ability</h2>
             <p>{t(careers[career].passive_ability.display_name)}</p>
             <p>{t(careers[career].passive_ability.description)}</p>
           </Ability>
           <Ability>
+            <h2>Career Skill</h2>
             <p>{t(careers[career].activated_ability.display_name)}</p>
             <p>{t(careers[career].activated_ability.description)}</p>
           </Ability>
+        </Row>
+        <Row>
+          <h2>Perks</h2>
+        </Row>
+        <Row>
+          {careers[career].passive_ability.perks.map(perk => (
+            <Ability key={perk.display_name}>
+              <p>{t(perk.display_name)}</p>
+              <p>{t(perk.description)}</p>
+            </Ability>
+          ))}
         </Row>
       </Section>
 
@@ -206,7 +219,7 @@ function App() {
       </Section>
       {careers[career].loadout_equipment_slots.map((type, i) => {
         return (
-          <div>
+          <div key={type}>
             <select>
               {Object.values(items)
                 .filter(item => {
@@ -215,7 +228,7 @@ function App() {
                   );
                 })
                 .map(item => (
-                  <option>{t(item.item_type)}</option>
+                  <option key={item.item_type}>{t(item.item_type)}</option>
                 ))}
             </select>
           </div>
