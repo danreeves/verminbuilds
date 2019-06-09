@@ -223,6 +223,7 @@ function App() {
             <select>
               {Object.values(items)
                 .filter(item => {
+                  // TODO: Too many trinkets, charms, and necklaces :(
                   return (
                     item.slot_type === type && item.can_wield.includes(career)
                   );
