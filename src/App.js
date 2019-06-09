@@ -13,8 +13,6 @@ const {
   items
 } = generatedData;
 
-console.log(items);
-
 const characterKeys = Object.keys(characters);
 
 const Page = styled.div`
@@ -240,7 +238,6 @@ function App() {
             >
               {Object.values(items)
                 .filter(item => {
-                  // TODO: Too many trinkets, charms, and necklaces :(
                   return (
                     item.slot_type === type && item.can_wield.includes(career)
                   );
