@@ -207,7 +207,6 @@ function App() {
       {careers[career].loadout_equipment_slots.map((type, i) => {
         return (
           <div>
-            <p key={type + i}>{type}</p>
             <select>
               {Object.values(items)
                 .filter(item => {
