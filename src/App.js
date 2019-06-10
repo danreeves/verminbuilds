@@ -2,7 +2,8 @@ import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { vsprintf as format } from "format";
 import styled from "styled-components";
-import { Record } from "immutable";
+import { Record, Set } from "immutable";
+import pkg from "../package.json";
 import generatedData from "./generated/data.json";
 
 const {
@@ -153,7 +154,14 @@ const Build = Record({
   talents: Talents(),
   equipment: getDefaultEquipmentForCareer(
     getDefaultCareerFromCharacter(characterKeys[0])[0]
-  )
+  ),
+  name: "",
+  description: "",
+  tags: Set(),
+  id: null,
+  owner_id: null,
+  game_version: "TODO", // TODO: pull game version from generatedData
+  verminbuilds_version: pkg.version
 });
 
 const defaultState = Build();
