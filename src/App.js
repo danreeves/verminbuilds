@@ -15,6 +15,8 @@ const {
   items
 } = generatedData;
 
+// TODO: This is in the wrong order because tables are unordered
+// Fix at data generation level
 const characterKeys = Object.keys(characters);
 
 const Page = styled.div`
