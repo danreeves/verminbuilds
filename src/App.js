@@ -2,7 +2,7 @@ import React, { useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { vsprintf as format } from "format";
 import styled from "styled-components";
-import { Record, Map } from "immutable";
+import { Record } from "immutable";
 import generatedData from "./generated/data.json";
 
 const {
@@ -10,6 +10,7 @@ const {
   careers,
   trees: talentTrees,
   talents,
+  num_talent_rows,
   items
 } = generatedData;
 
@@ -89,27 +90,57 @@ function localiseTalent(t, talent_data) {
   return format(description, values);
 }
 
+function getItemsForCareerAndSlot(career, slot) {
+  return Object.values(items).filter(item => {
+    return item.slot_type === slot && item.can_wield.includes(career);
+  });
+}
+
+function getDefaultEquipmentForCareer(career) {
+  const slots = careers[career].loadout_equipment_slots.reduce(
+    (slots, slot, i) => {
+      slots[i] = getItemsForCareerAndSlot(career, slot)[0].item_type;
+      return slots;
+    },
+    {}
+  );
+  return Equipment(slots);
+}
+
 function reducer(state, action) {
   const { type, payload } = action;
   switch (type) {
     case "character":
       return state
         .set("character", payload)
-        .set("career", getDefaultCareerFromCharacter(payload)[0]);
+        .set("career", getDefaultCareerFromCharacter(payload)[0])
+        .set(
+          "equipment",
+          getDefaultEquipmentForCareer(
+            getDefaultCareerFromCharacter(payload)[0]
+          )
+        );
     case "career":
-      return state.set("career", payload);
+      return state
+        .set("career", payload)
+        .set("equipment", getDefaultEquipmentForCareer(payload));
     case "talent":
       return state.setIn(["talents", payload.row_index], payload.talent_index);
     case "equip":
-      return state.setIn(["equipment", payload.type], payload.item);
+      return state.setIn(["equipment", payload.slot_index], payload.item);
     default:
       throw new Error(`Action "${type}" not matched`);
   }
 }
 
-// TODO: make this Record generated from
-// https://github.com/Aussiemon/Vermintide-2-Source-Code/blob/master/scripts/managers/talents/talent_settings.lua#L9-L10
 const Talents = Record(
+  Array.from({ length: num_talent_rows }).reduce((o, _, i) => {
+    o[i] = null;
+    return o;
+  }, {})
+);
+
+const Equipment = Record(
   Array.from({ length: 5 }).reduce((o, _, i) => {
     o[i] = null;
     return o;
@@ -120,7 +151,9 @@ const Build = Record({
   character: characterKeys[0],
   career: getDefaultCareerFromCharacter(characterKeys[0])[0],
   talents: Talents(),
-  equipment: Map()
+  equipment: getDefaultEquipmentForCareer(
+    getDefaultCareerFromCharacter(characterKeys[0])[0]
+  )
 });
 
 const defaultState = Build();
@@ -128,9 +161,7 @@ const defaultState = Build();
 function App() {
   const { t } = useTranslation();
   const [build, dispatch] = useReducer(reducer, defaultState);
-  const { character, career, talents } = build;
-
-  console.log(build);
+  const { character, career, talents, equipment } = build;
 
   return (
     <Page>
@@ -222,36 +253,37 @@ function App() {
           }
         )}
       </Section>
-      {careers[career].loadout_equipment_slots.map((type, i) => {
+      {careers[career].loadout_equipment_slots.map((slot, i) => {
         return (
-          <div key={type}>
+          <div key={slot + i}>
             <select
+              value={equipment.get(i)}
               onChange={e => {
                 dispatch({
                   type: "equip",
                   payload: {
-                    type,
+                    slot_index: i,
                     item: e.target.value
                   }
                 });
               }}
             >
-              {Object.values(items)
-                .filter(item => {
-                  return (
-                    item.slot_type === type && item.can_wield.includes(career)
-                  );
-                })
-                .map(item => (
-                  <option key={item.item_type} value={item.item_type}>
-                    {t(item.item_type)}
-                  </option>
-                ))}
+              {getItemsForCareerAndSlot(career, slot).map(item => (
+                <option key={item.item_type} value={item.item_type}>
+                  {t(item.item_type)}
+                </option>
+              ))}
             </select>
           </div>
         );
       })}
       <Section />
+
+      <Section>
+        <details>
+          <pre>{JSON.stringify(build.toJS(), null, 4)}</pre>
+        </details>
+      </Section>
     </Page>
   );
 }
